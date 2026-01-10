@@ -1,0 +1,36 @@
+﻿@model SistemaDeAsistencia.Models.Departamento
+
+@{
+    ViewData["Title"] = "Eliminar Departamento";
+}
+
+<div class="card shadow border-0 mt-4">
+    <div class="card-header bg-danger text-white d-flex align-items-center">
+        <i class="fa-solid fa-triangle-exclamation me-2"></i>
+        <h5 class="mb-0">Confirmar Eliminación</h5>
+    </div>
+    <div class="card-body">
+        <p class="text-muted">
+            ¿Está seguro que desea eliminar el siguiente departamento? Esta acción no se puede deshacer.
+        </p>
+        <dl class="row mb-0">
+            <dt class="col-sm-3 fw-bold">
+                @Html.DisplayNameFor(model => model.Nombre)
+            </dt>
+            <dd class="col-sm-9">
+                @Html.DisplayFor(model => model.Nombre)
+            </dd>
+        </dl>
+    </div>
+    <div class="card-footer d-flex justify-content-between">
+        <a asp-action="Index" class="btn btn-outline-secondary">
+            <i class="fa-solid fa-arrow-left"></i> Cancelar
+        </a>
+        <form asp-action="Delete" method="post" class="m-0">
+            <input type="hidden" asp-for="Id" />
+            <button type="submit" class="btn btn-danger">
+                <i class="fa-solid fa-trash"></i> Eliminar
+            </button>
+        </form>
+    </div>
+</div>

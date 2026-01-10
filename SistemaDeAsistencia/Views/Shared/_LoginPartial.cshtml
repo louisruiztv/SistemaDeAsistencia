@@ -1,0 +1,45 @@
+﻿@using Microsoft.AspNetCore.Identity
+@using SistemaDeAsistencia.Data
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+
+@{
+    var user = await UserManager.GetUserAsync(User);
+    var nombre = user?.NombreCompleto ?? user?.UserName ?? "Usuario";
+}
+
+<ul class="navbar-nav align-items-center">
+    @if (SignInManager.IsSignedIn(User))
+    {
+
+        <li class="nav-item me-2">
+            <a class="nav-link text-secondary" asp-area="Identity" asp-page="/Account/Manage/Index" title="Mi Perfil">
+                <i class="fas fa-user-circle me-1"></i>
+            </a>
+        </li>
+
+
+        <li class="nav-item">
+            <form class="d-inline" asp-area="Identity" asp-page="/Account/Logout"
+                  asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
+                <button type="submit" class="nav-link btn btn-link text-secondary">
+                    <i class="fas fa-sign-out-alt me-1"></i>Salir
+                </button>
+            </form>
+        </li>
+    }
+    else
+    {
+        <li class="nav-item">
+            <a class="nav-link text-light btn btn-secondary m-1" asp-area="Identity" asp-page="/Account/Register">
+                <i class="fas fa-sign-in-alt me-1"></i> Registrarse
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <a class="nav-link text-light btn btn-primary" asp-area="Identity" asp-page="/Account/Login">
+                <i class="fas fa-sign-in-alt me-1"></i> Iniciar Sesión
+            </a>
+        </li>
+    }
+</ul>

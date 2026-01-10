@@ -1,0 +1,126 @@
+﻿@model IEnumerable<SistemaDeAsistencia.Data.ApplicationUser>
+@using Microsoft.AspNetCore.Identity
+@using SistemaDeAsistencia.Data
+
+@inject UserManager<ApplicationUser> UserManager
+
+@{
+    ViewData["Title"] = "Listado de Empleados";
+}
+
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold text-primary">
+        <i class="fa-solid fa-users"></i> @ViewData["Title"]
+    </h2>
+    <a asp-controller="Admin" asp-action="CrearUsuario" class="btn btn-success shadow-sm">
+        <i class="fa-solid fa-user-plus"></i> Crear Nuevo Usuario
+    </a>
+</div>
+
+@if (TempData["Mensaje"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="fa-solid fa-circle-check me-2"></i> @TempData["Mensaje"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="fa-solid fa-triangle-exclamation me-2"></i> @TempData["Error"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+
+
+<div class="card mb-4 shadow-sm border-0">
+    <div class="card-body">
+        <form asp-controller="Admin" asp-action="Empleados" method="get">
+            <div class="input-group">
+                <input type="text" name="buscarNombre" class="form-control" placeholder="Buscar por nombre..."
+                       value="@ViewBag.CurrentFilter" />
+                <button class="btn btn-primary" type="submit">
+                    <i class="fa-solid fa-magnifying-glass"></i> Buscar
+                </button>
+                <button id="btnLimpiar" class="btn btn-secondary" type="button">
+                    <i class="fa-solid fa-xmark"></i> Limpiar
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card shadow-sm border-0">
+    <div class="card-body p-0">
+        <table class="table table-hover table-striped mb-0 align-middle">
+            <thead class="table-primary">
+                <tr>
+                    <th>Nombre Completo</th>
+                    <th>Email</th>
+                    <th>Departamento</th>
+                    <th class="text-end">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model != null && Model.Any())
+                {
+                    foreach (var item in Model)
+                    {
+                        
+                        var roles = await UserManager.GetRolesAsync(item);
+                        var esAdmin = roles.Contains("Admin");
+
+                        <tr class="@(esAdmin ? "table-success" : "")">
+                            <td>@Html.DisplayFor(modelItem => item.NombreCompleto)</td>
+                            <td>@Html.DisplayFor(modelItem => item.Email)</td>
+                            <td>
+                                @if (esAdmin)
+                                {
+                                    <span>Administrador</span>
+                                }
+                                else
+                                {
+                                    @Html.DisplayFor(modelItem => item.Departamento.Nombre)
+                                }
+                            </td>
+                            <td class="text-end">
+                                <a asp-controller="Admin" asp-action="DetallesEmpleado" asp-route-id="@item.Id"
+                                   class="btn btn-outline-info btn-sm me-1">
+                                    <i class="fa-solid fa-eye"></i>
+                                </a>
+                                <a asp-controller="Admin" asp-action="EditarUsuario" asp-route-id="@item.Id"
+                                   class="btn btn-outline-warning btn-sm me-1">
+                                    <i class="fa-solid fa-pen-to-square"></i>
+                                </a>
+
+                                @if (esAdmin)
+                                {
+                                    <button class="btn btn-outline-secondary btn-sm" disabled>
+                                        <i class="fa-solid fa-ban"></i>
+                                    </button>
+                                }
+                                else
+                                {
+                                    <a asp-controller="Admin" asp-action="EliminarUsuario" asp-route-id="@item.Id"
+                                       class="btn btn-outline-danger btn-sm">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </a>
+                                }
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="3" class="text-center text-muted py-4">
+                            <i class="fa-solid fa-circle-info"></i> No hay empleados registrados.
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

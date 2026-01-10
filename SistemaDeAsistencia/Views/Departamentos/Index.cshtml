@@ -1,0 +1,145 @@
+﻿@model IEnumerable<SistemaDeAsistencia.Models.Departamento>
+
+@{
+    ViewData["Title"] = "Departamentos";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="fw-bold text-primary">
+            <i class="fa-solid fa-building"></i> @ViewData["Title"]
+        </h2>
+        <a asp-action="Create" class="btn btn-success shadow-sm">
+            <i class="fa-solid fa-plus"></i> Crear Nuevo
+        </a>
+    </div>
+
+    <div class="row">
+    
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-primary text-white">
+                    Lista de Departamentos
+                </div>
+                <div class="card-body p-0">
+                    <table class="table table-hover table-striped table-bordered mb-0 align-middle">
+                        <thead class="table-primary">
+                            <tr>
+                                <th class="fw-bold">@Html.DisplayNameFor(model => model.Nombre)</th>
+                                <th class="text-end">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model != null && Model.Any())
+                            {
+                                foreach (var item in Model)
+                                {
+                                    <tr>
+                                        <td class="fw-semibold">@Html.DisplayFor(modelItem => item.Nombre)</td>
+                                        <td class="text-end">
+                                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-outline-primary btn-sm me-1">
+                                                <i class="fa-solid fa-pen-to-square"></i>
+                                            </a>
+                                            <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-outline-info btn-sm me-1">
+                                                <i class="fa-solid fa-eye"></i>
+                                            </a>
+                                            <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-outline-danger btn-sm">
+                                                <i class="fa-solid fa-trash"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="2" class="text-center text-muted py-4">
+                                        <i class="fa-solid fa-circle-info"></i> No hay departamentos registrados.
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-primary text-light">
+                    <i class="fa-solid fa-users"></i> Empleados por Departamento
+                </div>
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <label for="departamentoSelector" class="form-label me-2 mb-0">Seleccionar Departamento:</label>
+                        <select id="departamentoSelector" class="form-select flex-grow-1">
+                            <option value="">-- Seleccionar --</option>
+                            @foreach (var departamento in (List<SistemaDeAsistencia.Models.Departamento>)ViewBag.Departamentos)
+                            {
+                                <option value="@departamento.Id">@departamento.Nombre</option>
+                            }
+                        </select>
+                        <button id="mostrarEmpleadosBtn" class="btn btn-primary ms-2" disabled>
+                            <i class="fa-solid fa-magnifying-glass"></i> Mostrar
+                        </button>
+                    </div>
+
+                    <div id="empleadosContainer">
+                        <div class="alert alert-primary text-center" role="alert">
+                            <i class="fa-solid fa-circle-info"></i> Selecciona un departamento para ver sus empleados.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const departamentoSelector = document.getElementById('departamentoSelector');
+            const mostrarEmpleadosBtn = document.getElementById('mostrarEmpleadosBtn');
+            const empleadosContainer = document.getElementById('empleadosContainer');
+
+            
+            departamentoSelector.addEventListener('change', function () {
+                mostrarEmpleadosBtn.disabled = !this.value; // Este boton nos sirve para habilitar/deshabilitar el botón "Mostrar" según la selección del dropdown
+            });
+
+            async function cargarEmpleados() {
+                const departamentoId = departamentoSelector.value;
+                if (!departamentoId) {
+                    empleadosContainer.innerHTML = `<div class="alert alert-info text-center" role="alert">
+                                                             <i class="fa-solid fa-circle-info"></i> Selecciona un departamento para ver sus empleados.
+                                                         </div>`;
+                    return;
+                }
+
+                empleadosContainer.innerHTML = `<div class="text-center py-5">
+                                                         <div class="spinner-border text-primary" role="status">
+                                                             <span class="visually-hidden">Cargando...</span>
+                                                         </div>
+                                                         <p class="mt-2 text-muted">Cargando empleados...</p>
+                                                     </div>`;
+
+                try {
+                    const response = await fetch(`/Departamentos/GetEmpleadosPorDepartamento?departamentoId=${departamentoId}`);
+                    if (!response.ok) {
+                        throw new Error('No se pudo cargar la lista de empleados.');
+                    }
+                    const html = await response.text();
+                    empleadosContainer.innerHTML = html;
+                } catch (error) {
+                    console.error('Error:', error);
+                    empleadosContainer.innerHTML = `<div class="alert alert-danger text-center" role="alert">
+                                                            <i class="fa-solid fa-exclamation-triangle"></i> No se pudieron cargar los empleados.
+                                                        </div>`;
+                }
+            }
+
+            mostrarEmpleadosBtn.addEventListener('click', cargarEmpleados);
+        });
+    </script>
+}

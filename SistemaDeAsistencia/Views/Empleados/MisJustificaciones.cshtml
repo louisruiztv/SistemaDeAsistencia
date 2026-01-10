@@ -1,0 +1,77 @@
+﻿@model IEnumerable<SistemaDeAsistencia.Models.Justificacion>
+
+@{
+    ViewData["Title"] = "Mis Justificaciones";
+}
+
+<div class="container py-4">
+    <!-- Encabezado -->
+    <div class="bg-white rounded-3 shadow-sm p-4 mb-4">
+        <h1 class="display-6 fw-bold text-primary">
+            <i class="bi bi-file-earmark-text"></i> @ViewData["Title"]
+        </h1>
+        <p class="fs-6 text-muted mb-0">
+            Consulta el estado de las justificaciones enviadas y revisa los documentos adjuntos.
+        </p>
+    </div>
+
+    <!-- Tabla de Justificaciones -->
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Motivo</th>
+                            <th>Estado</th>
+                            <th>Archivo</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>@item.FechaInasistencia.ToString("dd/MM/yyyy")</td>
+                                <td>@Html.DisplayFor(modelItem => item.Motivo)</td>
+                                <td>
+                                    @switch (item.Estado)
+                                    {
+                                        case "Aprobada":
+                                            <span class="badge bg-success">Aprobada</span>
+                                            break;
+                                        case "Pendiente":
+                                            <span class="badge bg-warning text-dark">Pendiente</span>
+                                            break;
+                                        case "Rechazada":
+                                            <span class="badge bg-danger">Rechazada</span>
+                                            break;
+                                        default:
+                                            <span class="badge bg-secondary">Desconocido</span>
+                                            break;
+                                    }
+                                </td>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(item.RutaArchivoPDF))
+                                    {
+                                        <a asp-controller="Justificaciones"
+                                           asp-action="VerArchivo"
+                                           asp-route-nombreArchivo="@System.IO.Path.GetFileName(item.RutaArchivoPDF)"
+                                           target="_blank"
+                                           class="btn btn-outline-primary btn-sm">
+                                            <i class="fa-solid fa-file-pdf"></i> Ver
+                                        </a>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">Sin archivo</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

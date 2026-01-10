@@ -1,0 +1,58 @@
+﻿@model SistemaDeAsistencia.Models.Justificacion
+
+@{
+    ViewData["Title"] = "Justificar Inasistencia";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold text-danger">
+        <i class="fa-solid fa-file-pen"></i> @ViewData["Title"]
+    </h2>
+</div>
+
+@if (TempData["Mensaje"] != null)
+{
+    <div class="alert alert-success shadow-sm">
+        <i class="fa-solid fa-circle-check"></i> @TempData["Mensaje"]
+    </div>
+}
+
+<div class="card shadow-sm border-0">
+    <div class="card-body">
+        <form asp-action="Crear" enctype="multipart/form-data">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+            <div class="mb-3">
+                <label asp-for="FechaInasistencia" class="form-label fw-bold"></label>
+                <input asp-for="FechaInasistencia" type="date" class="form-control" />
+                <span asp-validation-for="FechaInasistencia" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Motivo" class="form-label fw-bold"></label>
+                <textarea asp-for="Motivo" class="form-control" rows="3" placeholder="Describa el motivo de la inasistencia..."></textarea>
+                <span asp-validation-for="Motivo" class="text-danger"></span>
+            </div>
+
+            <div class="mb-4">
+                <label for="archivoPdf" class="form-label fw-bold">
+                    <i class="fa-solid fa-upload"></i> Subir Justificación (PDF)
+                </label>
+                <input type="file" name="archivoPdf" id="archivoPdf" class="form-control" accept=".pdf" required />
+            </div>
+
+            <div class="d-grid gap-2 d-md-flex justify-content-md-start">
+                <button type="submit" class="btn btn-danger shadow-sm">
+                    <i class="fa-solid fa-paper-plane"></i> Enviar Justificación
+                </button>
+                <a asp-action="Index" class="btn btn-secondary shadow-sm">
+                    <i class="fa-solid fa-xmark"></i> Cancelar
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

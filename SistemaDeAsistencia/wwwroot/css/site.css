@@ -1,0 +1,106 @@
+html {
+    font-size: 14px;
+}
+
+@media (min-width: 768px) {
+    html {
+        font-size: 16px;
+    }
+}
+
+.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+    box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+}
+
+html {
+    position: relative;
+    min-height: 100%;
+}
+
+body {
+    background-color: #f3f3f3;
+    margin-bottom: 60px;
+    padding-top: 85px;
+}
+
+@media (max-width: 992px) {
+    .login-container {
+        justify-content: center; 
+    }
+
+    .login-card-wrapper {
+        margin: 1rem; 
+    }
+}
+
+.section {
+    padding-top: 5rem;
+    padding-bottom: 5rem;
+}
+
+.intro-section {
+    background-color: #f8f9fa; 
+}
+
+.features-section h2 {
+    color: #0d6efd; 
+}
+
+.roles-section h2 {
+    color: #212529; 
+}
+
+.roles-section ul {
+    display: inline-block;
+}
+
+
+/*Me gustaria darle mas estilo profesional*/
+.imagen_fondo_inicio {
+    background: url('/imagenes/fondodegradado.png');
+    background-size: cover; 
+    min-height: 100vh;
+    width: 100%;
+}
+
+.nav_personalizado {
+    font-size: 1rem;
+    color: #6c757d !important;
+    display: flex;
+    margin: 0 0.5rem;
+}
+
+.nav_personalizado .fas {
+        font-size: 1.4rem;
+        color: #6c757d !important;
+}
+
+/*Para pantallas mas grandes se coloca el icono arriba y el texto abajo*/
+@media (min-width: 800px) {
+    .nav_personalizado {
+        font-size: 0.7rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+}
+
+.encima_tarjeta {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.encima_tarjeta:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+}
+
+.link_activo{
+    border-bottom: 2px solid #272727; 
+    padding-bottom: 5px;
+    color: #252525 !important; 
+}
+
+.link_activo .fas {
+        color: #252525 !important;
+}

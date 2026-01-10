@@ -1,0 +1,49 @@
+﻿@model SistemaDeAsistencia.Data.ApplicationUser
+
+@{
+    ViewData["Title"] = "Eliminar Usuario";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold text-danger">
+        <i class="fa-solid fa-user-slash"></i> @ViewData["Title"]
+    </h2>
+    <a asp-action="Empleados" class="btn btn-outline-secondary shadow-sm">
+        <i class="fa-solid fa-arrow-left"></i> Volver al Listado
+    </a>
+</div>
+
+<div class="alert alert-warning shadow-sm">
+    <i class="fa-solid fa-triangle-exclamation"></i>
+    <strong>Advertencia:</strong> Esta acción no se puede deshacer.
+    ¿Está seguro de que desea eliminar este usuario?
+</div>
+
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-body">
+        <dl class="row mb-0">
+            <dt class="col-sm-4 fw-bold text-muted">
+                <i class="fa-solid fa-id-card"></i> @Html.DisplayNameFor(model => model.NombreCompleto)
+            </dt>
+            <dd class="col-sm-8">
+                @Html.DisplayFor(model => model.NombreCompleto)
+            </dd>
+            <dt class="col-sm-4 fw-bold text-muted">
+                <i class="fa-solid fa-envelope"></i> @Html.DisplayNameFor(model => model.Email)
+            </dt>
+            <dd class="col-sm-8">
+                @Html.DisplayFor(model => model.Email)
+            </dd>
+        </dl>
+    </div>
+</div>
+
+<form asp-action="EliminarUsuario" class="d-flex gap-2">
+    <input type="hidden" asp-for="Id" />
+    <button type="submit" class="btn btn-danger">
+        <i class="fa-solid fa-trash"></i> Eliminar
+    </button>
+    <a asp-action="Empleados" class="btn btn-secondary">
+        <i class="fa-solid fa-xmark"></i> Cancelar
+    </a>
+</form>

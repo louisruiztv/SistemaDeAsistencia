@@ -1,0 +1,31 @@
+﻿@model IEnumerable<SistemaDeAsistencia.Data.ApplicationUser>
+
+@if (Model != null && Model.Any())
+{
+    <div class="table-responsive">
+        <table class="table table-hover table-striped table-bordered mb-0 align-middle">
+            <thead class="table-secondary">
+                <tr>
+                    <th class="fw-bold">Nombre Completo</th>
+                    <th class="fw-bold">Correo Electrónico</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var empleado in Model)
+                {
+                    <tr>
+                        <td>@empleado.NombreCompleto</td>
+                        <td>@empleado.Email</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+else
+{
+    <div class="alert alert-warning text-center" role="alert">
+        <i class="fa-solid fa-info-circle"></i> No hay empleados registrados en este departamento.
+    </div>
+}
+

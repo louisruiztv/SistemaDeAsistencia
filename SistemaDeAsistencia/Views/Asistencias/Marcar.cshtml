@@ -1,0 +1,178 @@
+﻿@using Microsoft.AspNetCore.Identity
+@using SistemaDeAsistencia.Data
+@inject UserManager<ApplicationUser> UserManager
+
+@{
+    ViewData["Title"] = "Marcar Asistencia";
+    var user = await UserManager.GetUserAsync(User);
+    var nombre = user?.NombreCompleto ?? "Usuario";
+    var userId = user?.Id;
+    var mapTilerApiKey = "o1e2EdKK6iKaxbuBBvd8"; // Clave de geolocalizacion de MapTiler
+}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold text-primary">
+        <i class="fa-solid fa-clock"></i> @ViewData["Title"]
+    </h2>
+    <a asp-controller="Home" asp-action="Index" class="btn btn-outline-primary shadow-sm">
+        <i class="fa-solid fa-house"></i> Inicio
+    </a>
+</div>
+
+<div id="statusMessages" class="mb-3"></div>
+
+<div class="card shadow-lg border-0 rounded-4">
+    <div class="card-body text-center p-5" style="background: linear-gradient(135deg, #f5f7fa, #c3cfe2);">
+        <h4 class="mb-3 text-dark">Hola, <strong>@nombre</strong>!</h4>
+        <p class="text-secondary fs-6">Selecciona una opción para registrar tu asistencia.</p>
+
+        <div id="map" class="mb-4 rounded-3" style="width: 100%; height: 400px; border: 2px solid #ddd; box-shadow: 0 4px 8px rgba(0,0,0,0.1);"></div>
+
+        <div class="d-flex flex-column flex-md-row justify-content-center gap-3 mt-3">
+            <button id="btnMarcarEntrada" class="btn btn-success btn-lg shadow-sm rounded-pill flex-fill" disabled>
+                <i class="fa-solid fa-right-to-bracket"></i> Marcar Entrada
+            </button>
+            <button id="btnMarcarSalida" class="btn btn-danger btn-lg shadow-sm rounded-pill flex-fill" disabled>
+                <i class="fa-solid fa-right-from-bracket"></i> Marcar Salida
+            </button>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    <link href="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.css" rel="stylesheet" />
+    <script src="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.js"></script>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const btnEntrada = document.getElementById('btnMarcarEntrada');
+        const btnSalida = document.getElementById('btnMarcarSalida');
+        const statusMessages = document.getElementById('statusMessages');
+        const userId = '@userId';
+        const mapTilerApiKey = '@mapTilerApiKey';
+        const antiForgeryTokenInput = document.querySelector('input[name="__RequestVerificationToken"]'); //para proteger la peticion del servidor
+        const antiForgeryToken = antiForgeryTokenInput ? antiForgeryTokenInput.value : '';
+
+        let latitud = null;
+        let longitud = null;
+        let direccion = 'Dirección no encontrada';
+        let marcador = null;
+
+        const map = new maplibregl.Map({  // Inicializamos el mapa y lo centramos
+            container: 'map',
+            style: `https://api.maptiler.com/maps/streets-v2/style.json?key=${mapTilerApiKey}`,
+            center: [0, 0],
+            zoom: 2
+        });
+
+        function displayMessage(clase, mensaje) {
+            statusMessages.innerHTML = `<div class="alert ${clase} shadow-sm">${mensaje}</div>`;
+        }
+
+        function restoreButtons() { 
+            btnEntrada.disabled = false;
+            btnSalida.disabled = false;
+        }
+
+        function obtenerUbicacion() { //obtenemos la ubicacion y centramos el mapa
+            if (!navigator.geolocation) {
+                displayMessage('alert-danger', 'Tu navegador no soporta geolocalización.');
+                return;
+            }
+
+            navigator.geolocation.getCurrentPosition(async function(position) { //obtenemos la ubicacion actual
+                latitud = position.coords.latitude;
+                longitud = position.coords.longitude;
+              
+                map.flyTo({ center: [longitud, latitud], zoom: 15 });   //Centramos el mapa con flyTo y agregamos el marcador
+                if (marcador) marcador.remove();
+                marcador = new maplibregl.Marker().setLngLat([longitud, latitud]).addTo(map); //Marker hace que se coloque un marcador en el mapa
+
+                // Para habilitar botones ahora que la ubicación está lista
+                btnEntrada.disabled = false;
+                btnSalida.disabled = false;
+
+                // Para obtener dirección desde MapTiler
+                try {
+                    const apiUrl = `https://api.maptiler.com/geocoding/${longitud},${latitud}.json?key=${mapTilerApiKey}`;
+
+                    const response = await fetch(apiUrl);
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data.features && data.features.length > 0) {
+                            direccion = data.features[0].properties.label; // obtenemos la direccion
+                        }
+                    }
+                } catch (err) {
+                    console.warn('No se pudo obtener la dirección:', err);
+                }
+
+            }, function(error) {
+                switch (error.code) {
+                    case error.PERMISSION_DENIED:
+                        displayMessage('alert-danger', 'Acceso a la ubicación denegado. Por favor, permite la ubicación en tu navegador.');
+                        break;
+                    case error.POSITION_UNAVAILABLE:
+                        displayMessage('alert-danger', 'Información de ubicación no disponible.');
+                        break;
+                    case error.TIMEOUT:
+                        displayMessage('alert-danger', 'La solicitud de ubicación ha caducado.');
+                        break;
+                    default:
+                        displayMessage('alert-danger', `Error inesperado: ${error.message}`);
+                        break;
+                }
+            }, { timeout: 10000 });
+        }
+
+        async function marcarAsistencia(tipo) {  //Nuestra función para enviar la asistencia al servidor
+            if (!latitud || !longitud) {
+                displayMessage('alert-warning', 'No se pudo obtener la ubicación. Intenta nuevamente.');
+                return;
+            }
+
+            btnEntrada.disabled = true;
+            btnSalida.disabled = true;
+            displayMessage('alert-info', 'Enviando asistencia...');
+
+            try {
+                const asistenciaData = {
+                    tipo: tipo,
+                    latitud: latitud,
+                    longitud: longitud,
+                    direccion: direccion
+                };
+
+                const response = await fetch('/Asistencias/Marcar', { //enviamos los datos de asistencia al servidor
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json', // e; cuerpo de la peticiion es JSON
+                        ...(antiForgeryToken ? { 'RequestVerificationToken': antiForgeryToken } : {})
+                    },
+                    body: JSON.stringify(asistenciaData)
+                });
+
+                const result = await response.json(); //enviamos los datos de la asistencia convertidos en JSON
+                if (response.ok) {
+                    displayMessage('alert-success', result.message);
+                } else {
+                    displayMessage('alert-danger', result.message);
+                }
+
+            } catch (err) {
+                console.error(err);
+                displayMessage('alert-danger', 'Error al enviar la asistencia.');
+            } finally {
+                restoreButtons();
+            }
+        }
+
+        // Asignar eventos a los botones
+        btnEntrada.addEventListener('click', () => marcarAsistencia('entrada'));
+        btnSalida.addEventListener('click', () => marcarAsistencia('salida'));
+
+        
+        obtenerUbicacion();// Llamada inicial para obtener la ubicación
+    });
+    </script>
+}

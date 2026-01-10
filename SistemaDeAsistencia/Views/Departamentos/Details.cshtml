@@ -1,0 +1,30 @@
+﻿@model SistemaDeAsistencia.Models.Departamento
+
+@{
+    ViewData["Title"] = "Detalles del Departamento";
+}
+
+<div class="card shadow border-0 mt-4">
+    <div class="card-header bg-info text-white d-flex align-items-center">
+        <i class="fa-solid fa-circle-info me-2"></i>
+        <h5 class="mb-0">Detalles del Departamento</h5>
+    </div>
+    <div class="card-body">
+        <dl class="row mb-0">
+            <dt class="col-sm-3 fw-bold">
+                @Html.DisplayNameFor(model => model.Nombre)
+            </dt>
+            <dd class="col-sm-9">
+                @Html.DisplayFor(model => model.Nombre)
+            </dd>
+        </dl>
+    </div>
+    <div class="card-footer d-flex justify-content-between">
+        <a asp-action="Index" class="btn btn-outline-secondary">
+            <i class="fa-solid fa-arrow-left"></i> Volver
+        </a>
+        <a asp-action="Edit" asp-route-id="@Model?.Id" class="btn btn-primary">
+            <i class="fa-solid fa-pen-to-square"></i> Editar
+        </a>
+    </div>
+</div>

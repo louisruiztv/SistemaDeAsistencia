@@ -1,0 +1,119 @@
+﻿@model SistemaDeAsistencia.Data.ApplicationUser
+
+@{
+    ViewData["Title"] = "Detalles de " + Model.NombreCompleto;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold text-primary">
+        <i class="fa-solid fa-id-card"></i> @ViewData["Title"]
+    </h2>
+    <a asp-action="Empleados" class="btn btn-outline-secondary shadow-sm">
+        <i class="fa-solid fa-arrow-left"></i> Volver al Listado
+    </a>
+</div>
+
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-header bg-primary text-white">
+        <i class="fa-solid fa-user"></i> Información del Empleado
+    </div>
+    <div class="card-body">
+        <dl class="row mb-0">
+            <dt class="col-sm-3 fw-bold">@Html.DisplayNameFor(model => model.NombreCompleto)</dt>
+            <dd class="col-sm-9">@Html.DisplayFor(model => model.NombreCompleto)</dd>
+
+            <dt class="col-sm-3 fw-bold">@Html.DisplayNameFor(model => model.Email)</dt>
+            <dd class="col-sm-9">@Html.DisplayFor(model => model.Email)</dd>
+
+            <dt class="col-sm-3 fw-bold">Departamento</dt>
+            <dd class="col-sm-9">
+                @if (Model.Departamento != null)
+                {
+                    @Html.DisplayFor(model => model.Departamento.Nombre)
+                }
+                else
+                {
+                    <span class="text-muted">No asignado</span>
+                }
+            </dd>
+        </dl>
+    </div>
+</div>
+
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-header bg-success text-white">
+        <i class="fa-solid fa-clock"></i> Historial de Asistencias
+    </div>
+    <div class="card-body p-0">
+        <table class="table table-hover table-striped mb-0 align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>Entrada</th>
+                    <th>Salida</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Asistencias != null && Model.Asistencias.Any())
+                {
+                    foreach (var asistencia in Model.Asistencias)
+                    {
+                        <tr>
+                            <td>@Html.DisplayFor(modelItem => asistencia.Entrada)</td>
+                            <td>@Html.DisplayFor(modelItem => asistencia.Salida)</td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="2" class="text-center text-muted py-3">
+                            <i class="fa-solid fa-circle-info"></i> No hay registros de asistencia.
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-header bg-warning text-dark">
+        <i class="fa-solid fa-file-lines"></i> Justificaciones Enviadas
+    </div>
+    <div class="card-body p-0">
+        <table class="table table-hover table-striped mb-0 align-middle mb-4">
+            <thead class="table-light">
+                <tr>
+                    <th>Fecha de Inasistencia</th>
+                    <th>Motivo</th>
+                    <th>Archivo</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Justificaciones != null && Model.Justificaciones.Any())
+                {
+                    foreach (var justificacion in Model.Justificaciones)
+                    {
+                        <tr>
+                            <td>@justificacion.FechaInasistencia.ToString("dd/MM/yyyy")</td>
+                            <td>@Html.DisplayFor(modelItem => justificacion.Motivo)</td>
+                            <td>
+                                <a href="@justificacion.RutaArchivoPDF" target="_blank" class="btn btn-outline-info btn-sm">
+                                    <i class="fa-solid fa-file-pdf"></i> Ver PDF
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="3" class="text-center text-muted py-3">
+                            <i class="fa-solid fa-circle-info"></i> No hay justificaciones registradas.
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

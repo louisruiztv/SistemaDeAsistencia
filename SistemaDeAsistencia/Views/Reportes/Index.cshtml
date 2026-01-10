@@ -1,0 +1,221 @@
+﻿@using X.PagedList
+@using X.PagedList.Mvc.Core
+@using X.PagedList.Web.Common
+@model X.PagedList.IPagedList<SistemaDeAsistencia.Models.Asistencia>
+
+@{
+    ViewData["Title"] = "Reporte de Asistencia";
+    var users = ViewData["Users"] as List<SistemaDeAsistencia.Data.ApplicationUser>;
+    var selectedUserId = ViewData["SelectedUserId"] as string;
+    var fechaInicio = ViewData["FechaInicio"] as string;
+    var fechaFin = ViewData["FechaFin"] as string;
+    var totalRegistros = ViewData["TotalRegistros"]; // Obtener el total de registros del ViewData
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold text-primary">
+        <i class="fa-solid fa-clipboard-list"></i> @ViewData["Title"]
+    </h2>
+    <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary shadow-sm">
+        <i class="fa-solid fa-arrow-left"></i> Volver al Inicio
+    </a>
+</div>
+
+@if (TempData["Mensaje"] != null)
+{
+    <div class="alert alert-success mt-3 shadow-sm">@TempData["Mensaje"]</div>
+}
+
+
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-body">
+        <form asp-action="Index" method="get">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-3">
+                    <label class="form-label fw-bold">Fecha de Inicio</label>
+                    <input type="date" name="fechaInicio" class="form-control" value="@fechaInicio" />
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-bold">Fecha de Fin</label>
+                    <input type="date" name="fechaFin" class="form-control" value="@fechaFin" />
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label fw-bold">Empleado</label>
+                    <select name="userId" class="form-select">
+                        <option value="">Todos</option>
+                        @if (users != null)
+                        {
+                            @foreach (var user in users)
+                            {
+                                <option value="@user.Id" selected="@(user.Id == selectedUserId)">@user.NombreCompleto</option>
+                            }
+                        }
+                    </select>
+                </div>
+                <div class="col-md-2 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fa-solid fa-filter"></i> Filtrar
+                    </button>
+                    <a asp-action="Index" class="btn btn-outline-secondary w-100" title="Deshacer filtros">
+                        <i class="fa-solid fa-xmark"></i> Deshacer
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+<form asp-action="ExportarPDF" method="post" class="mb-4">
+    <input type="hidden" name="fechaInicio" value="@fechaInicio" />
+    <input type="hidden" name="fechaFin" value="@fechaFin" />
+    <input type="hidden" name="userId" value="@selectedUserId" />
+    <button type="submit" class="btn btn-danger shadow-sm">
+        <i class="fa-solid fa-file-pdf"></i> Generar PDF
+    </button>
+</form>
+
+<h4 class="mb-3">Mostrando @Model.Count de @totalRegistros registros</h4>
+
+
+<div class="table-responsive shadow-sm mb-3">
+    <table class="table table-hover table-bordered align-middle">
+        <thead class="bg-primary text-light text-center">
+            <tr>
+                <th>Usuario</th>
+                <th>Fecha</th>
+                <th>Entrada</th>
+                <th>Salida</th>
+                <th>Latitud Entrada</th>
+                <th>Longitud Entrada</th>
+                <th>Latitud Salida</th>
+                <th>Longitud Salida</th>
+                <th>Ubicación</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.Any())
+            {
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@item.Usuario.NombreCompleto</td>
+                        <td>@item.Entrada.Value.ToString("dd/MM/yyyy")</td>
+                        <td>@item.Entrada?.ToString("HH:mm")</td>
+                        <td>@item.Salida?.ToString("HH:mm")</td>
+                        <td>@item.LatitudEntrada</td>
+                        <td>@item.LongitudEntrada</td>
+                        <td>@item.LatitudSalida</td>
+                        <td>@item.LongitudSalida</td>
+                        <td class="text-center">
+                            <button type="button" class="btn btn-sm btn-info text-light ver-ubicacion"
+                                    data-bs-toggle="modal" data-bs-target="#mapModal"
+                                    data-lat="@item.LatitudEntrada" data-lng="@item.LongitudEntrada"
+                                    title="Ver Entrada">
+                                <i class="fa-solid fa-map-pin"></i>
+                            </button>
+                            @if (item.Salida.HasValue)
+                            {
+                                <button type="button" class="btn btn-sm btn-secondary ver-ubicacion"
+                                        data-bs-toggle="modal" data-bs-target="#mapModal"
+                                        data-lat="@item.LatitudSalida" data-lng="@item.LongitudSalida"
+                                        title="Ver Salida">
+                                    <i class="fa-solid fa-map-pin"></i>
+                                </button>
+                            }
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="8" class="text-center text-muted">No se encontraron registros para los filtros seleccionados.</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@Html.PagedListPager(Model, pagina => Url.Action("Index",
+    new
+    {
+        pagina = pagina,
+        fechaInicio = fechaInicio,
+        fechaFin = fechaFin,
+        userId = selectedUserId
+    }),
+    new X.PagedList.Web.Common.PagedListRenderOptions
+    {
+        LiElementClasses = new string[] { "page-item" },
+        PageClasses = new string[] { "page-link" }
+    })
+
+
+
+<!--MOdal para mostrar el pop-up del mapa de los botones ver ubicacion-->
+<div class="modal fade" id="mapModal" tabindex="-1" aria-labelledby="mapModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="mapModalLabel">Ubicación en el Mapa</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="modalMap" style="height: 500px; width: 100%;"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+@section Scripts {
+    <link href="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.css" rel="stylesheet" />
+    <script src="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const mapTilerApiKey = "o1e2EdKK6iKaxbuBBvd8"; // Tu clave de MapTiler
+
+            // Obtenemos el modal de Bootstrap
+            const mapModal = document.getElementById('mapModal');
+            let modalMapInstance = null;
+            let modalMarker = null;
+
+            // Al abrir el modal, inicializamos el mapa
+            mapModal.addEventListener('shown.bs.modal', function () {
+                if (!modalMapInstance) {
+                    modalMapInstance = new maplibregl.Map({
+                        container: 'modalMap',
+                        style: `https://api.maptiler.com/maps/streets-v2/style.json?key=${mapTilerApiKey}`,
+                        center: [0, 0], // Se centrará más tarde
+                        zoom: 15
+                    });
+                }
+            });
+
+            // Manejador para los clics en los botones de la tabla
+            document.querySelectorAll('.ver-ubicacion').forEach(button => {
+                button.addEventListener('click', function () {
+                    const lat = parseFloat(this.getAttribute('data-lat'));
+                    const lng = parseFloat(this.getAttribute('data-lng'));
+
+                    if (modalMapInstance) {
+                        // Centramos el mapa y agregamos el marcador
+                        modalMapInstance.flyTo({ center: [lng, lat], zoom: 15 });
+
+                        if (modalMarker) modalMarker.remove();
+                        modalMarker = new maplibregl.Marker()
+                            .setLngLat([lng, lat])
+                            .addTo(modalMapInstance);
+                    }
+                });
+            });
+        });
+    </script>
+}

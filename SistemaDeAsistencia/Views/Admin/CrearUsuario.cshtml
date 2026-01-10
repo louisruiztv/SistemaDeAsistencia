@@ -1,0 +1,60 @@
+﻿@model SistemaDeAsistencia.Controllers.CrearUsuarioViewModel
+
+@{
+    ViewData["Title"] = "Crear Nuevo Usuario";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold text-primary">
+        <i class="fa-solid fa-user-plus"></i> @ViewData["Title"]
+    </h2>
+    <a asp-action="Empleados" class="btn btn-outline-secondary shadow-sm">
+        <i class="fa-solid fa-arrow-left"></i> Volver al Listado
+    </a>
+</div>
+
+<div class="card shadow-sm border-0">
+    <div class="card-body">
+        <form asp-action="CrearUsuario">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+            <div class="mb-3">
+                <label asp-for="NombreCompleto" class="form-label fw-bold"></label>
+                <input asp-for="NombreCompleto" class="form-control" placeholder="Ingrese el nombre completo" />
+                <span asp-validation-for="NombreCompleto" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Email" class="form-label fw-bold"></label>
+                <input asp-for="Email" class="form-control" placeholder="ejemplo@correo.com" />
+                <span asp-validation-for="Email" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Password" class="form-label fw-bold"></label>
+                <input asp-for="Password" class="form-control" type="password" placeholder="Ingrese una contraseña segura" />
+                <span asp-validation-for="Password" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="DepartamentoId" class="form-label fw-bold"></label>
+                <select asp-for="DepartamentoId" class="form-select" asp-items="ViewBag.DepartamentoId">
+                    <option value="">-- Seleccionar Departamento --</option>
+                </select>
+                <span asp-validation-for="DepartamentoId" class="text-danger"></span>
+            </div>
+
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fa-solid fa-save"></i> Crear
+                </button>
+                <a asp-action="Empleados" class="btn btn-secondary">
+                    <i class="fa-solid fa-xmark"></i> Cancelar
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
