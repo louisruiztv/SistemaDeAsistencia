@@ -29,6 +29,10 @@ Sistema web desarrollado como proyecto final del curso **Programación Aplicada 
 - Arquitectura en capas / MVC (según implementación del proyecto).
 - Separación de responsabilidades entre presentación, lógica de negocio y acceso a datos.
 
+## Visualizacion
+<img width="1898" height="972" alt="image" src="https://github.com/user-attachments/assets/31a1ae32-52e3-46dc-9b06-6ddbf08d8396" />
+
+
 ## ▶️ Instalación y ejecución
 1. Clonar el repositorio:
    ```bash
